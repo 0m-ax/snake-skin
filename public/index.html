@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        html,body{
+            padding: 0px;
+            margin: 0px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #holder{
+            display: inline-block;
+            position: relative;
+            width: 100%;
+            height: calc(100% - 66px);
+        }
+        .nav{
+            height: 64px;
+            background-color: #ff0000;
+            z-index: 99;
+            color: #ffffff;
+            width: 100%;
+            font-size: 48px;
+            position: relative;
+        }
+        .nav > .title{
+            float: right;
+        }
+        .apps{
+            min-width: 300px;
+            height: 100%;
+            z-index: 99;
+            top:0px;
+            left: 0px;
+            background-color: #ffffff;
+            position: absolute;
+            padding: 0px 16px;
+            padding-top:16px;
+            overflow-y: scroll;
+            box-sizing:border-box;
+        }
+        .appTile{
+            background-color: #ff0000;
+            width: 100%;
+            box-sizing:border-box;
+            padding: 8px;
+            margin-top:8px;
+            margin-bottom:8px;
+            display: block;
+        }
+        .app{
+            width: 100%;
+            height: 100%;
+        }
+        iframe{
+            padding: 0px;
+            margin: 0px;
+            border-width: 0px;
+            display: block;
+        }
+        .navCover{
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top:0px;
+            left: 0px;
+            background-color: black;
+            opacity: 0.5;
+            z-index: 98;
+        }
+        .hidden{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="title">Snake Skin</div>
+        <a id="menu" href="#">Menu</a>
+    </div>
+    <div id="holder"></div>
+    <div class="navCover hidden" id="navCover">
+    </div>
+    <div class="apps hidden" id="apps">
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io()
+        let holder = document.getElementById("holder")
+        socket.on('message',({programID,data})=>{
+            let el = document.getElementById('program:'+programID)
+            if(el){
+                el.postMessage(data)
+            }
+        })
+        window.onmessage= ({source,data})=>{
+            let frame = Array.from(document.getElementsByClassName("app")).find((frame)=>frame.contentWindow===source)
+            if(frame){
+                console.log({
+                    frame,
+                    data
+                })
+                socket.emit('message',{
+                    programID:frame.dataset.id,
+                    data,
+                })
+            }
+        }
+        socket.once('apps',(apps)=>{
+            let appsEl = document.getElementById("apps");
+            for(let app of apps){
+                let appEl = document.createElement('a');
+                appEl.classList+='appTile';
+                appEl.textContent = app.title;
+                appEl.onclick=(e)=>{
+                    e.preventDefault();
+                    console.log('click')
+                    socket.emit('runApp',{id:app.id})
+                }
+                appEl.href="#"
+                appsEl.appendChild(appEl);
+            }
+        })
+        socket.on('state',(state)=>{
+            {
+                let apps = holder.getElementsByClassName("app")
+                let appIDs = state.map(({id})=>id)
+                for(let app of apps){
+                    if(appIDs.indexOf(app.dataset.id) == -1){
+                        holder.removeChild(app);
+                    }
+                }
+            }
+            let apps = Array.from(holder.getElementsByClassName("app"))
+            for(let appIndex in state){
+                let app = state[appIndex]
+                let appEl = apps.find((appEl)=>{
+                    return appEl.dataset.id == app.id
+                })
+                if(!appEl){
+                    appEl = document.createElement('iframe')
+                    appEl.dataset.id = app.id;
+                    appEl.classList+="app"
+                    holder.appendChild(appEl)
+                    appEl.setAttribute('id',"program:"+app.id)
+                    appEl.contentWindow.test=function(){
+                        console.log(appEl)
+                    }
+                    //console.log(appEl.contentWindow)
+                }
+                appEl.style['z-index']=appIndex;
+                if(appEl.getAttribute('srcdoc') !=app.clientCode){
+                    appEl.setAttribute('srcdoc',app.clientCode)
+                }
+            }
+        })
+        document.getElementById('menu').onclick = (e)=>{
+            e.preventDefault()
+            document.getElementById("apps").classList.remove("hidden")
+            document.getElementById("navCover").classList.remove("hidden")
+        }
+        document.getElementById('navCover').onclick = (e)=>{
+            e.preventDefault()
+            document.getElementById("apps").classList.add("hidden")
+            document.getElementById("navCover").classList.add("hidden")
+        }
+    </script>
+    <style>
+        .app{
+            background-color: white;
+            position: absolute;
+            top:0px;
+            left:0px;
+        }
+    </style>
+</body>
+</html>

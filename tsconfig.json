@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ES6",
+            "webworker"
+        ],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es6",
+        "outDir":"dest/"
+    }
+}

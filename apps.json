@@ -1,0 +1,17 @@
+{
+    "fakta":{
+        "title":"Fakta close warning",
+        "code":"let hexg = new context.HexGrid();\nfor (let index = 3; index <= 12; index++) {\n hexg.get(index,6).color = [255,0,0];\n}\nfor (let index = 6; index <= 9; index++) {\nhexg.get(3,index).color = [255,0,0];\n}\nfor (let index = 4; index <= 9; index++) {\nhexg.get(6,index).color = [255,0,0];\n}\ncontext.getState = function (){return hexg.export()}\nsetTimeout(()=>context.terminate(),15000);",
+        "clientCode":"<h1>Fakta closes in 30 minutes</h1><h1>Fakta lukker om 30 minutter</h1>"
+    },
+    "random":{
+        "title":"Random colors",
+        "code":"let basewait = 1000;\nfunction random(min, max) {\nreturn Math.floor(Math.random() * (max - min + 1) ) + min;\n}\nlet hexg = new context.HexGrid();\nfor (let i = 0; i < 15; i++) {\nlet color = [random(0,255),random(0,255),random(0,255)];\nfor (let i2 = 0; i2 < 100; i2++) {\nlet hex = hexg.get(random(0,17),random(0,11));\nif(hex){\nhex.color=color;\n}\n}\n}\nlet color = [random(0,255),random(0,255),random(0,255)];\nsetInterval(()=>{\nlet hex = hexg.get(random(0,17),random(0,11));\nif(hex){\nhex.color=color;\n}\n},basewait)\nsetInterval(()=>{\ncolor = [random(0,255),random(0,255),random(0,255)];\n},basewait*100);\ncontext.getState = function (){return hexg.export()}",
+        "clientCode":"<style>*{margin:0px;padding:0px;border-width: 0px;}html,body,iframe{width:100%;height:100%;}</style><iframe style='width:100%;height:100%;' src='https://f-t.win/'></iframe>"
+    },
+    "Test Patern":{
+        "title":"Test Patern",
+        "code":"let hexg = new context.HexGrid();\nlet offset = 0;\nfunction update(){for (let index = offset; index < hexg.items.length+offset; index++) {\nif(hexg.items[index-offset]){\nif(index%3 ==0){\nhexg.items[index-offset].color = [255,0,0];\n}else if(index%3 ==1){\nhexg.items[index-offset].color = [0,255,0];\n}else if(index%3 ==2){\nhexg.items[index-offset].color = [0,0,255];}\n}\n}\n}\nupdate()\nhexg.get(0,11).color=[255,255,255];\ncontext.onmessage=function(){offset++;update();}\ncontext.getState = function (){return hexg.export()}\nsetTimeout(()=>context.terminate(),30000);",
+        "clientCode":"<button id='changeOffset'>change offset</button><script>document.getElementById('changeOffset').onclick=()=>{window.parent.postMessage(0,window.parent.origin)}</script>"
+    }
+}
