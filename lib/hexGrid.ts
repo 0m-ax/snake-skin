@@ -1,3 +1,4 @@
+import { TypedEvent } from "./typedEvent";
 export const GRIDMAP = [
     [[]       ,[]         ,[]   ,[]   ,[]   ,[]       ,[]       ,[174]    ,[175]    ,[176]    ,[177,178],[179,180]],
     [[]       ,[]         ,[]   ,[173],[172],[171]    ,[170]    ,[169]    ,[168]    ,[166,167],[164,165],[]        ],
@@ -23,7 +24,8 @@ export class Hex {
     col:number;
     readonly id:number;
     leds:Array<number>
-    color:Array<number>
+    color:Array<number>;
+
     constructor(row,col,id,leds,color=[0,0,0]){
         this.row = row;
         this.col = col;
@@ -51,6 +53,19 @@ export class HexGrid {
     set(row,col,item){
         this.items[this.cols*row+col]=item;
     }
+    import(input){
+        let items = this.items.map((item)=>item.leds.map((led)=>({
+            led,
+            item
+        }))).reduce((acu,i)=>{
+            return acu.concat(i)
+        },[])
+        .sort(function(a, b){return a.led - b.led})
+        .map(({item})=>item)
+        for(let itemID in items){
+            items[itemID].color=input[itemID];
+        }
+    }
     export(){
         return this.items.map((item)=>item.leds.map((led)=>({
             led,
@@ -60,5 +75,59 @@ export class HexGrid {
         },[])
         .sort(function(a, b){return a.led - b.led})
         .map(({item})=>item.color)
+    }
+}
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function colorToHex(input:Array<number>) {
+    return componentToHex(input[0]) + componentToHex(input[1]) + componentToHex(input[2]);
+}
+export class HexGridElment {
+    element:Document;
+    grid:HexGrid;
+    elementHexMap= new Map<HTMLElement,Hex>();
+    hexElmentMap= new Map<Hex,HTMLElement>();
+    hexClickedEvent = new TypedEvent<Hex>();
+    constructor(element,grid){
+        this.element=element;
+        this.grid=grid;
+        this.element.addEventListener('touchstart',this.onTouch.bind(this))
+        this.element.addEventListener('touchmove',this.onTouch.bind(this))
+        this.element.addEventListener('click',this.onClick.bind(this))
+        for(let item of this.grid.items.filter((item)=>item)){
+            let el = <HTMLElement>this.element.getElementsByClassName('hex'+item.id)[0]
+            if(el){
+                this.elementHexMap.set(el,item)
+                this.hexElmentMap.set(item,el)
+            }
+        }
+        //this.render()
+    }
+    render(){
+        for(let item of this.grid.items.filter((item)=>item)){
+            let el = this.hexElmentMap.get(item)
+            el.style.fill = "#"+colorToHex(item.color);
+        }
+    }
+    onClick(event:MouseEvent){
+        let el = <HTMLElement>document.elementFromPoint(event.clientX, event.clientY)
+        let hex = this.elementHexMap.get(el);
+        if(!hex){
+            return;
+        }
+        this.hexClickedEvent.emit(hex)
+        event.preventDefault();
+    }
+    onTouch(event:TouchEvent){
+        let el = <HTMLElement>document.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY)
+        let hex = this.elementHexMap.get(el);
+        if(!hex){
+            return;
+        }
+        this.hexClickedEvent.emit(hex)
+        event.preventDefault();
     }
 }

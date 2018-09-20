@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "run": "node dest/server.js"
+    "start": "node dest/server.js"
   },
   "author": "",
   "license": "ISC",

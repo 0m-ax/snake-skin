@@ -4,9 +4,9 @@ const express = require('express')
 import {Server as httpServer} from 'http';
 const socketIO = require('socket.io')
 var SerialPort = require('serialport');
-
+import {join} from 'path'
 let app = express();
-app.use(express.static('../public'))
+app.use(express.static(join(__dirname,'..','public')))
 app.get('/api/push/:id',(req,res)=>{
     if(config[req.params.id]){
         stack.pushProgram(new Program(config[req.params.id].code,config[req.params.id].clientCode))
@@ -39,7 +39,7 @@ let config = require('../apps.json')
 //     context.getState = function (){return hexg.export()}
 //     setTimeout(()=>context.terminate(),30000);
 // `;
-let stack = new ProgramStack(new Program(config['random'].code,config['random'].clientCode));
+export let stack = new ProgramStack(new Program(config['random'].code,config['random'].clientCode));
 // stack.pushProgram(new Program(program2,'<h1>Test patern</h1>'))
 // stack.pushProgram(new Program(facta,'<h1>Facta</h1>'))
 
@@ -90,13 +90,18 @@ io.on('connection',(socket)=>{
     })
 
 })
-http.listen(3000)
-var port = new SerialPort('/dev/ttyUSB0',{
-    baudRate:57600
-});
+http.listen(3000);
 function pad_array(arr,len,fill) {
     return arr.concat(Array(len).fill(fill)).slice(0,len);
 }
+// setInterval(async ()=>{
+//     let leds = pad_array(await stack.getState(),180,[0,0,0])
+//     io.emit('update',leds)
+// },1000);
+var port = new SerialPort('/dev/ttyUSB0',{
+    baudRate:57600
+});
+
 let i = 0;
 port.on('data',async (d)=>{
     try {

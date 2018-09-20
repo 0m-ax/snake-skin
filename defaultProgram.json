@@ -1,4 +1,0 @@
-{
-    "code":"let state = []; context.getState = function(){}",
-    "clientCode":"<h1>Random</h1>"
-}
