@@ -101,9 +101,12 @@ function pad_array(arr,len,fill) {
 var port = new SerialPort('/dev/ttyUSB0',{
     baudRate:57600
 });
-
+console.time("update")
 let i = 0;
 port.on('data',async (d)=>{
+    console.timeEnd("update")
+    console.time("update")
+    console.time("getState")
     try {
         let leds = await stack.getState()
         let lr = pad_array(leds,180,[0,0,0])
@@ -113,5 +116,5 @@ port.on('data',async (d)=>{
     } catch (error) {
         console.log(error);
     }
-
+    console.timeEnd("getState")
 })
