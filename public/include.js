@@ -50,9 +50,25 @@ System.register("lib/hexGrid", ["lib/typedEvent"], function (exports_2, context_
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
+    exports_2("componentToHex", componentToHex);
     function colorToHex(input) {
         return componentToHex(input[0]) + componentToHex(input[1]) + componentToHex(input[2]);
     }
+    exports_2("colorToHex", colorToHex);
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+        ] : null;
+    }
+    exports_2("hexToRgb", hexToRgb);
     return {
         setters: [
             function (typedEvent_1_1) {
@@ -153,6 +169,7 @@ System.register("lib/hexGrid", ["lib/typedEvent"], function (exports_2, context_
                     this.element.addEventListener('touchstart', this.onTouch.bind(this));
                     this.element.addEventListener('touchmove', this.onTouch.bind(this));
                     this.element.addEventListener('click', this.onClick.bind(this));
+                    this.element.addEventListener('mousemove', this.onMouseMove.bind(this));
                     for (var _i = 0, _a = this.grid.items.filter(function (item) { return item; }); _i < _a.length; _i++) {
                         var item = _a[_i];
                         var el = this.element.getElementsByClassName('hex' + item.id)[0];
@@ -168,6 +185,12 @@ System.register("lib/hexGrid", ["lib/typedEvent"], function (exports_2, context_
                         var item = _a[_i];
                         var el = this.hexElmentMap.get(item);
                         el.style.fill = "#" + colorToHex(item.color);
+                    }
+                };
+                HexGridElment.prototype.onMouseMove = function (event) {
+                    console.log(event);
+                    if (event.buttons) {
+                        this.onClick(event);
                     }
                 };
                 HexGridElment.prototype.onClick = function (event) {
@@ -209,6 +232,7 @@ System.register("web", ["lib/hexGrid"], function (exports_3, context_3) {
             exports_3("HexGrid", hexGrid_1.HexGrid);
             exports_3("Hex", hexGrid_1.Hex);
             exports_3("GRIDMAP", hexGrid_1.GRIDMAP);
+            exports_3("hexToRgb", hexGrid_1.hexToRgb);
         }
     };
 });

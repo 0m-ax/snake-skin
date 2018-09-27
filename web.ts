@@ -1,2 +1,2 @@
-import {HexGridElment,HexGrid,Hex,GRIDMAP} from './lib/hexGrid'
-export {HexGridElment,HexGrid,Hex,GRIDMAP}
+import {HexGridElment,HexGrid,Hex,GRIDMAP,hexToRgb} from './lib/hexGrid'
+export {HexGridElment,HexGrid,Hex,GRIDMAP,hexToRgb}

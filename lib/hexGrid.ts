@@ -77,12 +77,12 @@ export class HexGrid {
         .map(({item})=>item.color)
     }
 }
-function componentToHex(c) {
+export function componentToHex(c) {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
 }
 
-function colorToHex(input:Array<number>) {
+export function colorToHex(input:Array<number>) {
     return componentToHex(input[0]) + componentToHex(input[1]) + componentToHex(input[2]);
 }
 export class HexGridElment {
@@ -97,6 +97,7 @@ export class HexGridElment {
         this.element.addEventListener('touchstart',this.onTouch.bind(this))
         this.element.addEventListener('touchmove',this.onTouch.bind(this))
         this.element.addEventListener('click',this.onClick.bind(this))
+        this.element.addEventListener('mousemove',this.onMouseMove.bind(this))
         for(let item of this.grid.items.filter((item)=>item)){
             let el = <HTMLElement>this.element.getElementsByClassName('hex'+item.id)[0]
             if(el){
@@ -110,6 +111,12 @@ export class HexGridElment {
         for(let item of this.grid.items.filter((item)=>item)){
             let el = this.hexElmentMap.get(item)
             el.style.fill = "#"+colorToHex(item.color);
+        }
+    }
+    onMouseMove(event:MouseEvent){
+        console.log(event)
+        if(event.buttons){
+            this.onClick(event)
         }
     }
     onClick(event:MouseEvent){
@@ -130,4 +137,18 @@ export class HexGridElment {
         this.hexClickedEvent.emit(hex)
         event.preventDefault();
     }
+}
+export function hexToRgb(hex) {
+    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+    ] : null;
 }
