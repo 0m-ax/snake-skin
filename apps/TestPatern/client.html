@@ -1,0 +1,6 @@
+<button id='changeOffset'>change offset</button>
+<script>
+    document.getElementById('changeOffset').onclick = () => {
+        window.parent.postMessage(0, window.parent.origin)
+    }
+</script>

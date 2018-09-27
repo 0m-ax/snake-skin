@@ -5,6 +5,7 @@ import {Server as httpServer} from 'http';
 const socketIO = require('socket.io')
 var SerialPort = require('serialport');
 import {join} from 'path'
+import { readdirSync, readFileSync } from 'fs';
 let app = express();
 app.use(express.static(join(__dirname,'..','public')))
 app.get('/api/push/:id',(req,res)=>{
@@ -21,27 +22,17 @@ app.get('/api/pop',(req,res)=>{
 })
 let http = new httpServer(app);
 let io = socketIO(http);
-let config = require('../apps.json')
-// let program2 = `
-//     let hexg = new context.HexGrid();
-//     for (let index = 0; index < hexg.items.length; index++) {
-//         if(hexg.items[index]){
-//             if(index%3 ==0){
-//                 hexg.items[index].color = [255,0,0];
-//             }else if(index%3 ==1){
-//                 hexg.items[index].color = [0,255,0];
-//             }else if(index%3 ==2){
-//                 hexg.items[index].color = [0,0,255];
-//             }
-//         }
-//     }
-//     hexg.get(0,11).color=[255,255,255]
-//     context.getState = function (){return hexg.export()}
-//     setTimeout(()=>context.terminate(),30000);
-// `;
+let config = {};
+let appIDs = readdirSync(join(__dirname,'..','apps'))
+for(let appID of appIDs){
+    let appConfig = require(join(__dirname,'..','apps/',appID,'app.json'))
+    config[appID] = {};
+    config[appID].code = readFileSync(join(__dirname,'..','apps/',appID,appConfig.server)).toString();
+    config[appID].clientCode = readFileSync(join(__dirname,'..','apps/',appID,appConfig.client)).toString();
+    config[appID].title = appConfig.title;
+}
+
 export let stack = new ProgramStack(new Program(config['random'].code,config['random'].clientCode));
-// stack.pushProgram(new Program(program2,'<h1>Test patern</h1>'))
-// stack.pushProgram(new Program(facta,'<h1>Facta</h1>'))
 
 stack.onMessageEvent.on(({program,data})=>{
     io.emit('message',{
@@ -94,27 +85,27 @@ http.listen(3000);
 function pad_array(arr,len,fill) {
     return arr.concat(Array(len).fill(fill)).slice(0,len);
 }
-// setInterval(async ()=>{
-//     let leds = pad_array(await stack.getState(),180,[0,0,0])
-//     io.emit('update',leds)
-// },1000);
-var port = new SerialPort('/dev/ttyUSB0',{
-    baudRate:57600
-});
-console.time("update")
-let i = 0;
-port.on('data',async (d)=>{
-    console.timeEnd("update")
-    console.time("update")
-    console.time("getState")
-    try {
-        let leds = await stack.getState()
-        let lr = pad_array(leds,180,[0,0,0])
-        for(let led of pad_array(leds,180,[0,0,0])){
-            port.write(Buffer.from(pad_array(led,3,0)));
-        }
-    } catch (error) {
-        console.log(error);
-    }
-    console.timeEnd("getState")
-})
+setInterval(async ()=>{
+    let leds = pad_array(await stack.getState(),180,[0,0,0])
+    io.emit('update',leds)
+},1000);
+// var port = new SerialPort('/dev/ttyUSB0',{
+//     baudRate:57600
+// });
+// console.time("update")
+// let i = 0;
+// port.on('data',async (d)=>{
+//     console.timeEnd("update")
+//     console.time("update")
+//     console.time("getState")
+//     try {
+//         let leds = await stack.getState()
+//         let lr = pad_array(leds,180,[0,0,0])
+//         for(let led of pad_array(leds,180,[0,0,0])){
+//             port.write(Buffer.from(pad_array(led,3,0)));
+//         }
+//     } catch (error) {
+//         console.log(error);
+//     }
+//     console.timeEnd("getState")
+// })
