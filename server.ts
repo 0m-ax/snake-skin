@@ -85,27 +85,27 @@ http.listen(3000);
 function pad_array(arr,len,fill) {
     return arr.concat(Array(len).fill(fill)).slice(0,len);
 }
-setInterval(async ()=>{
-    let leds = pad_array(await stack.getState(),180,[0,0,0])
-    io.emit('update',leds)
-},1000);
-// var port = new SerialPort('/dev/ttyUSB0',{
-//     baudRate:57600
-// });
-// console.time("update")
-// let i = 0;
-// port.on('data',async (d)=>{
-//     console.timeEnd("update")
-//     console.time("update")
-//     console.time("getState")
-//     try {
-//         let leds = await stack.getState()
-//         let lr = pad_array(leds,180,[0,0,0])
-//         for(let led of pad_array(leds,180,[0,0,0])){
-//             port.write(Buffer.from(pad_array(led,3,0)));
-//         }
-//     } catch (error) {
-//         console.log(error);
-//     }
-//     console.timeEnd("getState")
-// })
+// setInterval(async ()=>{
+//     let leds = pad_array(await stack.getState(),180,[0,0,0])
+//     io.emit('update',leds)
+// },1000);
+var port = new SerialPort('/dev/ttyUSB0',{
+    baudRate:57600
+});
+console.time("update")
+let i = 0;
+port.on('data',async (d)=>{
+    console.timeEnd("update")
+    console.time("update")
+    console.time("getState")
+    try {
+        let leds = await stack.getState()
+        let lr = pad_array(leds,180,[0,0,0])
+        for(let led of pad_array(leds,180,[0,0,0])){
+            port.write(Buffer.from(pad_array(led,3,0)));
+        }
+    } catch (error) {
+        console.log(error);
+    }
+    console.timeEnd("getState")
+})
