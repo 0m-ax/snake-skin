@@ -398,7 +398,20 @@
                     type: "update", data: hexg.export(),
                 }, window.parent.origin)
             })
-        }) 
+            window.onmessage= function(event){
+            if(event.origin == window.parent.origin){
+                console.log(event.data)
+                if(event.data.type == "update"){
+                    hexg.import(event.data.data)
+                    hexEl.render()
+                }
+            }else{
+                console.log(event)
+                console.log("not for me")
+            }
+        }
+        })
+
     </script>
 </body>
 

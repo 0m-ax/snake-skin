@@ -96,7 +96,7 @@
         socket.on('message',({programID,data})=>{
             let el = document.getElementById('program:'+programID)
             if(el){
-                el.postMessage(data)
+                el.contentWindow.postMessage(data,el.contentWindow.origin)
             }
         })
         window.onmessage= ({source,data})=>{
