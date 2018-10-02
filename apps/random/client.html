@@ -5,10 +5,44 @@
         border-width: 0px;
     }
 
-    html,
+    /* html,
     body,
     iframe {
         width: 100%;
-        height: 100%;
+        height: 00%;
+    } */
+</style>
+Change a hex's color every <input type="number" id="changeHexTime" min="250" />ms<br>
+Change the colour every <input type="number" id="changeColorTime" min="250"/>ms<br>
+<button id="update">Update</button>
+<script>
+    let changeHexTimeEL = document.getElementById("changeHexTime")
+    let changeColorTimeEl = document.getElementById("changeColorTime");
+    let updateEl = document.getElementById("update");
+    window.onmessage= function(event){
+        if(event.origin == window.parent.origin){
+            if(event.data.type == "update"){
+                console.log( event.data.data)
+                changeHexTimeEL.value = event.data.data.changeHexTime;
+                changeColorTimeEl.value = event.data.data.changeColorTime;
+            }
+        }
     }
-</style><iframe style='width:100%;height:100%;' src='https://f-t.win/'></iframe>
+    updateEl.addEventListener('click',(e)=>{
+        e.preventDefault()
+        console.log(changeHexTimeEL.value,changeColorTimeEl.value)
+        window.parent.postMessage({
+            type: "update",
+            data:{
+                changeHexTime:changeHexTimeEL.value,
+                changeColorTime:changeColorTimeEl.value
+            }
+        }, window.parent.origin)
+    })
+    setTimeout(()=>{
+        window.parent.postMessage({
+            type: "sync"
+        }, window.parent.origin)
+    })
+</script>
+<!-- <iframe style='width:100%;height:100%;' src='https://f-t.win/'></iframe> -->
