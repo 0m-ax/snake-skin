@@ -1,5 +1,6 @@
 {
     "title":"Fakta close warning",
     "client":"client.html",
-    "server":"server.js"
+    "server":"server.js",
+    "hidden":true
 }

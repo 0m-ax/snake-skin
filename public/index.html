@@ -115,16 +115,18 @@
         socket.once('apps',(apps)=>{
             let appsEl = document.getElementById("apps");
             for(let app of apps){
-                let appEl = document.createElement('a');
-                appEl.classList+='appTile';
-                appEl.textContent = app.title;
-                appEl.onclick=(e)=>{
-                    e.preventDefault();
-                    console.log('click')
-                    socket.emit('runApp',{id:app.id})
+                if(!app.hidden){
+                    let appEl = document.createElement('a');
+                    appEl.classList+='appTile';
+                    appEl.textContent = app.title;
+                    appEl.onclick=(e)=>{
+                        e.preventDefault();
+                        console.log('click')
+                        socket.emit('runApp',{id:app.id})
+                    }
+                    appEl.href="#"
+                    appsEl.appendChild(appEl);
                 }
-                appEl.href="#"
-                appsEl.appendChild(appEl);
             }
         })
         socket.on('state',(state)=>{

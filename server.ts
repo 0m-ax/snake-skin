@@ -30,6 +30,7 @@ for(let appID of appIDs){
     config[appID].code = readFileSync(join(__dirname,'..','apps/',appID,appConfig.server)).toString();
     config[appID].clientCode = readFileSync(join(__dirname,'..','apps/',appID,appConfig.client)).toString();
     config[appID].title = appConfig.title;
+    config[appID].hidden = appConfig.hidden || false;
 }
 
 export let stack = new ProgramStack(new Program(config['random'].code,config['random'].clientCode));
@@ -65,7 +66,8 @@ io.on('connection',(socket)=>{
     }))
     socket.emit('apps',Object.keys(config).map((id)=>({
         id:id,
-        title:config[id].title
+        title:config[id].title,
+        hidden:config[id].hidden
     })))
     socket.on('message',({programID,data})=>{
         let program = stack.programStack.find(({id})=>id == programID);
